@@ -1,0 +1,26 @@
+version: '3'
+services:
+    redis:
+        image: redis:4.0.6-alpine
+        ports:
+          - "6379:6379"
+        volumes:
+            - ./redis:/redis
+
+    flask-app:
+        image: wherego
+        container_name: wherego
+        build: .
+        restart: always
+        ports:
+            - '5000:5000'
+        volumes:
+            - .:/WhereGo
+
+    worker:
+        image: wherego:latest
+        depends_on:
+            - redis
+        command: rq worker --url redis://redis:6379
+        links:
+            - redis
